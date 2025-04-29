@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "calendarcell.h"
 
 #include <QDate>
 #include <QLabel>
@@ -8,7 +9,6 @@
 
 void MainWindow::fillCalendar(int year, int month) {
     QDate firstDay(year, month, 1);
-    QDate today = QDate::currentDate();
 
     int daysInMonth = firstDay.daysInMonth();
     int startDay = (firstDay.dayOfWeek() + 6) % 7; // Пн = 0
@@ -34,22 +34,7 @@ void MainWindow::fillCalendar(int year, int month) {
         for (int col = 0; col < 7; ++col) {
             int index = row * 7 + col;
             if (index >= startDay && day <= daysInMonth) {
-                QWidget *cellWidget = new QWidget();
-                QVBoxLayout *layout = new QVBoxLayout(cellWidget);
-                layout->setSpacing(2);
-                layout->setContentsMargins(10, 10, 10, 10);
-
-                QLabel *dayLabel = new QLabel(QString::number(day));
-                dayLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-                QString color = (col == 6 || col == 5) ? "#ff5555" : "#cccccc";  // красный для воскресенья
-                dayLabel->setStyleSheet(QString("color: %1; font-weight: bold;").arg(color));
-
-                if (day == today.day()) {
-                    cellWidget->setStyleSheet("background-color: #9499ad");
-                }
-                layout->addWidget(dayLabel);
-                cellWidget->setLayout(layout);
-
+                CalendarCell *cellWidget = new CalendarCell(year, month, day);
                 ui->calendarTable->setCellWidget(row, col, cellWidget);
                 day++;
             }

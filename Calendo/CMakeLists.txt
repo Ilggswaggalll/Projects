@@ -23,6 +23,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Calendo
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        calendarcell.h calendarcell.cpp calendarcell.ui
 
 
 
