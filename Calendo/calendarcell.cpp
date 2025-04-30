@@ -12,32 +12,44 @@ CalendarCell::CalendarCell(int year, int month, int day, QWidget *parent)
     ui->setupUi(this);
 
     layout = new QVBoxLayout(this);
-    layout->setSpacing(2);
-    layout->setContentsMargins(10, 10, 10, 10);
+    layout->setSpacing(5);
+    layout->setContentsMargins(7, 7, 7, 7);
 
     dayLabel = new QLabel(QString::number(day), this);
-    dayLabel->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     dayLabel->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 14px;");
+    dayLabel->move(10, 5);  // Вручную размещаем в верхнем левом углу
 
     addEventLabel = new QLabel("Добавить событие?", this);
     addEventLabel->setAlignment(Qt::AlignCenter);
-    addEventLabel->setStyleSheet("color: #aaaaaa; font-size: 12px;");
+    addEventLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     addEventLabel->setVisible(false);
+    addEventLabel->setStyleSheet(R"(
+    QLabel {
+        color: #aaaaaa;
+        font-size: 14px;
+        background-color: rgba(36, 38, 41, 150);
+        border-radius: 15px;
+        padding: 10px;
+    }
+)");
 
-    layout->addWidget(dayLabel);
-    layout->addStretch();
-    layout->addWidget(addEventLabel);
+    layout->addWidget(addEventLabel);  // центрируем и растягиваем
 
     QDate today = QDate::currentDate();
+    QDate cellDate(year, month, day);
     if (today.year() == year && today.month() == month && today.day() == day) {
         isToday = true;
-        normalBackground = "#5c5f7a";  // Светлый фон для сегодняшнего дня
-    } else {
+        dayLabel->setStyleSheet("color: #8ecae6; font-weight: bold; font-size: 14px;");
+    }
+    else if (cellDate.dayOfWeek() == 6 || cellDate.dayOfWeek() == 7){
+        dayLabel->setStyleSheet("color: lightcoral; font-weight: bold; font-size: 14px;");
+    }
+    else {
         isToday = false;
-        normalBackground = "#2f3136";  // Обычный фон
+        dayLabel->setStyleSheet("color: white; font-weight: bold; font-size: 14px;");
     }
 
-    hoverBackground = "#6a6f90"; // Цвет фона при наведении
+    hoverBackground = "#2f3136"; // Цвет фона при наведении
 
     updateBackground();
 }
@@ -45,10 +57,10 @@ CalendarCell::CalendarCell(int year, int month, int day, QWidget *parent)
 void CalendarCell::updateBackground(bool hovered)
 {
     QString backgroundColor = hovered ? hoverBackground : normalBackground;
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     this->setStyleSheet(QString(R"(
         QWidget {
             background-color: %1;
-            border-radius: 10px;
         }
     )").arg(backgroundColor));
 }
@@ -58,6 +70,7 @@ void CalendarCell::enterEvent(QEnterEvent *event)
     Q_UNUSED(event);
     updateBackground(true);
     addEventLabel->setVisible(true);
+    dayLabel->setVisible(false);
 }
 
 void CalendarCell::leaveEvent(QEvent *event)
@@ -65,6 +78,7 @@ void CalendarCell::leaveEvent(QEvent *event)
     Q_UNUSED(event);
     updateBackground(false);
     addEventLabel->setVisible(false);
+    dayLabel->setVisible(true);
 }
 
 void CalendarCell::mousePressEvent(QMouseEvent *event)
