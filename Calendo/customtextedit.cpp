@@ -1,15 +1,12 @@
 #include "customtextedit.h"
+
 #include <QKeyEvent>
 #include <QStringList>
 #include <QTextBlock>
-
-
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
-
-
 
 
 CustomTextEdit::CustomTextEdit(QWidget *parent)
@@ -160,7 +157,6 @@ void CustomTextEdit::saveEventsToJson(const QString &filePath) {
         file.close();
     }
 }
-
 
 
 QStringList CustomTextEdit::getEventList() const {

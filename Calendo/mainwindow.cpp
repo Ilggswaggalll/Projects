@@ -10,138 +10,16 @@
 #include <QApplication>
 #include <QTouchEvent>
 #include <QDebug>
-#include <QGestureRecognizer>
-#include <QSwipeGesture>
 #include <QHeaderView>
 #include <QFrame>
 #include <QApplication>
 #include <QKeyEvent>
-
 #include <QMessageBox>
 #include <QWidgetAction>
 #include <QSystemTrayIcon>
-#include <QTimer>
-#include <QTime>
 #include <QThread>
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    QStringList months = { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-                          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
-    if (event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
-        if (keyEvent->key() == Qt::Key_Left) {
-            // Стрелка влево — предыдущий месяц
-            selectedMonth = (selectedMonth == 1) ? 12 : selectedMonth - 1;
-            if (selectedMonth == 12) selectedYear--;
-            monthButton->setText(months[selectedMonth - 1]);
-            yearSpinBox->setValue(selectedYear);
-            updateCalendar();
-            return true;
-        } else if (keyEvent->key() == Qt::Key_Right) {
-            // Стрелка вправо — следующий месяц
-            selectedMonth = (selectedMonth % 12) + 1;
-            if (selectedMonth == 1) selectedYear++;
-            monthButton->setText(months[selectedMonth - 1]);
-            yearSpinBox->setValue(selectedYear);
-            updateCalendar();
-            return true;
-        }
-    }
-
-    // Передаём событие дальше
-    return QMainWindow::eventFilter(obj, event);
-}
-
-void MainWindow::fillCalendar(int year, int month) {
-    QDate firstDay(year, month, 1);
-    int daysInMonth = firstDay.daysInMonth();
-    int startDay = (firstDay.dayOfWeek() + 6) % 7;
-
-    int totalCells = startDay + daysInMonth;
-    int rows = (totalCells <= 35) ? 5 : 6;
-
-
-    grabGesture(Qt::SwipeGesture);
-    grabGesture(Qt::PanGesture);
-    setAttribute(Qt::WA_AcceptTouchEvents);
-    QApplication::setAttribute(Qt::AA_SynthesizeTouchForUnhandledMouseEvents, true);
-
-    // Обработка свайпов
-    grabGesture(Qt::SwipeGesture);
-
-    ui->calendarTable->setRowCount(rows);
-    ui->calendarTable->setColumnCount(7);
-    ui->calendarTable->clearContents();
-
-    QStringList daysOfWeek = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
-    ui->calendarTable->setHorizontalHeaderLabels(daysOfWeek);
-
-    QDate prevMonth = firstDay.addMonths(-1);
-    int prevDays = prevMonth.daysInMonth();
-    int day = 1;
-    int nextDay = 1;
-    bool isCurrentMonthDay = false;
-
-    for (int row = 0; row < 6; ++row) {
-        for (int col = 0; col < 7; ++col) {
-            int index = row * 7 + col;
-            QWidget *cellWidget = nullptr;
-
-            if (index < startDay) {
-                int dayNumber = prevDays - (startDay - index) + 1;
-                isCurrentMonthDay = false;
-                cellWidget = new CalendarCell(prevMonth.year(), prevMonth.month(), dayNumber, isCurrentMonthDay);
-                cellWidget->setEnabled(false);
-                cellWidget->setStyleSheet("color: gray;");
-            } else if (day <= daysInMonth) {
-                isCurrentMonthDay = true;
-                cellWidget = new CalendarCell(year, month, day++, isCurrentMonthDay);
-            } else {
-                QDate nextMonth = firstDay.addMonths(1);
-                isCurrentMonthDay = false;
-                cellWidget = new CalendarCell(nextMonth.year(), nextMonth.month(), nextDay++, isCurrentMonthDay);
-                cellWidget->setEnabled(false);
-                cellWidget->setStyleSheet("color: gray;");
-            }
-
-            // Подключаем сигнал каждой ячейки к слоту MainWindow для скрытия других редакторов
-            CalendarCell* calendarCell = qobject_cast<CalendarCell*>(cellWidget);
-            if (calendarCell) {
-                connect(calendarCell, &CalendarCell::closeEventEditor, this, &MainWindow::closeAllEventEditors);
-
-            }
-
-            ui->calendarTable->setCellWidget(row, col, cellWidget);
-        }
-    }
-}
-
-void MainWindow::closeAllEventEditors() {
-    // Перебираем все ячейки и скрываем их QTextEdit
-    for (int row = 0; row < ui->calendarTable->rowCount(); ++row) {
-        for (int col = 0; col < ui->calendarTable->columnCount(); ++col) {
-            QWidget *widget = ui->calendarTable->cellWidget(row, col);
-            CalendarCell* calendarCell = qobject_cast<CalendarCell*>(widget);
-            if (calendarCell && calendarCell->isEventEditorVisible()) {
-                calendarCell->saveEventText();
-                calendarCell->hideEventEditor();
-            }
-        }
-    }
-}
-
-void MainWindow::updateCalendar() {
-    selectedYear = yearSpinBox->value();
-    QDate date = QDate::currentDate();
-    if (selectedYear == date.year() && selectedMonth == date.month()) {
-        todayButton->hide();
-    } else {
-        todayButton->show();
-    }
-    fillCalendar(selectedYear, selectedMonth);
-}
 
 
 
@@ -431,14 +309,127 @@ QPushButton:hover {
 
 
 
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    QStringList months = { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" };
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent->key() == Qt::Key_Left) {
+            // Стрелка влево — предыдущий месяц
+            selectedMonth = (selectedMonth == 1) ? 12 : selectedMonth - 1;
+            if (selectedMonth == 12) selectedYear--;
+            monthButton->setText(months[selectedMonth - 1]);
+            yearSpinBox->setValue(selectedYear);
+            updateCalendar();
+            return true;
+        } else if (keyEvent->key() == Qt::Key_Right) {
+            // Стрелка вправо — следующий месяц
+            selectedMonth = (selectedMonth % 12) + 1;
+            if (selectedMonth == 1) selectedYear++;
+            monthButton->setText(months[selectedMonth - 1]);
+            yearSpinBox->setValue(selectedYear);
+            updateCalendar();
+            return true;
+        }
+    }
+
+    // Передаём событие дальше
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void MainWindow::fillCalendar(int year, int month) {
+    QDate firstDay(year, month, 1);
+    int daysInMonth = firstDay.daysInMonth();
+    int startDay = (firstDay.dayOfWeek() + 6) % 7;
+
+    int totalCells = startDay + daysInMonth;
+    int rows = (totalCells <= 35) ? 5 : 6;
 
 
-MainWindow::~MainWindow() {
-    delete ui;
+    grabGesture(Qt::SwipeGesture);
+    grabGesture(Qt::PanGesture);
+    setAttribute(Qt::WA_AcceptTouchEvents);
+    QApplication::setAttribute(Qt::AA_SynthesizeTouchForUnhandledMouseEvents, true);
+
+    // Обработка свайпов
+    grabGesture(Qt::SwipeGesture);
+
+    ui->calendarTable->setRowCount(rows);
+    ui->calendarTable->setColumnCount(7);
+    ui->calendarTable->clearContents();
+
+    QStringList daysOfWeek = { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
+    ui->calendarTable->setHorizontalHeaderLabels(daysOfWeek);
+
+    QDate prevMonth = firstDay.addMonths(-1);
+    int prevDays = prevMonth.daysInMonth();
+    int day = 1;
+    int nextDay = 1;
+    bool isCurrentMonthDay = false;
+
+    for (int row = 0; row < 6; ++row) {
+        for (int col = 0; col < 7; ++col) {
+            int index = row * 7 + col;
+            QWidget *cellWidget = nullptr;
+
+            if (index < startDay) {
+                int dayNumber = prevDays - (startDay - index) + 1;
+                isCurrentMonthDay = false;
+                cellWidget = new CalendarCell(prevMonth.year(), prevMonth.month(), dayNumber, isCurrentMonthDay);
+                cellWidget->setEnabled(false);
+                cellWidget->setStyleSheet("color: gray;");
+            } else if (day <= daysInMonth) {
+                isCurrentMonthDay = true;
+                cellWidget = new CalendarCell(year, month, day++, isCurrentMonthDay);
+            } else {
+                QDate nextMonth = firstDay.addMonths(1);
+                isCurrentMonthDay = false;
+                cellWidget = new CalendarCell(nextMonth.year(), nextMonth.month(), nextDay++, isCurrentMonthDay);
+                cellWidget->setEnabled(false);
+                cellWidget->setStyleSheet("color: gray;");
+            }
+
+            // Подключаем сигнал каждой ячейки к слоту MainWindow для скрытия других редакторов
+            CalendarCell* calendarCell = qobject_cast<CalendarCell*>(cellWidget);
+            if (calendarCell) {
+                connect(calendarCell, &CalendarCell::closeEventEditor, this, &MainWindow::closeAllEventEditors);
+
+            }
+
+            ui->calendarTable->setCellWidget(row, col, cellWidget);
+        }
+    }
+}
+
+void MainWindow::closeAllEventEditors() {
+    // Перебираем все ячейки и скрываем их QTextEdit
+    for (int row = 0; row < ui->calendarTable->rowCount(); ++row) {
+        for (int col = 0; col < ui->calendarTable->columnCount(); ++col) {
+            QWidget *widget = ui->calendarTable->cellWidget(row, col);
+            CalendarCell* calendarCell = qobject_cast<CalendarCell*>(widget);
+            if (calendarCell && calendarCell->isEventEditorVisible()) {
+                calendarCell->saveEventText();
+                calendarCell->hideEventEditor();
+            }
+        }
+    }
+}
+
+void MainWindow::updateCalendar() {
+    selectedYear = yearSpinBox->value();
+    QDate date = QDate::currentDate();
+    if (selectedYear == date.year() && selectedMonth == date.month()) {
+        todayButton->hide();
+    } else {
+        todayButton->show();
+    }
+    fillCalendar(selectedYear, selectedMonth);
 }
 
 
-// Изменённый метод проверки уведомлений
+// метод проверки уведомлений
 void MainWindow::checkForNotifications(bool forceCheck)
 {
     QDate today = QDate::currentDate();
@@ -470,9 +461,6 @@ void MainWindow::checkForNotifications(bool forceCheck)
                                 QSystemTrayIcon::Information,
                                 0 // Уведомление останется пока пользователь не закроет
                                 );
-
-                            // Добавляем задержку между уведомлениями
-                            QThread::msleep(300);
                         }
                     }
                 }
@@ -480,3 +468,11 @@ void MainWindow::checkForNotifications(bool forceCheck)
         }
     }
 }
+
+
+MainWindow::~MainWindow() {
+    delete ui;
+}
+
+
+

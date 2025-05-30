@@ -1,12 +1,10 @@
 #include "calendarcell.h"
 #include "ui_calendarcell.h"
+
 #include <QEvent>
 #include <QPalette>
 #include <QDate>
 #include <QMouseEvent>
-
-
-
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
@@ -18,7 +16,6 @@
 
 QDate date;
 
-
 CalendarCell::CalendarCell(int year, int month, int day, bool isCurrentMonthDay, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::CalendarCell)
@@ -27,7 +24,6 @@ CalendarCell::CalendarCell(int year, int month, int day, bool isCurrentMonthDay,
     , bellState(-1)
 {
     ui->setupUi(this);
-
 
 
     hintLabel = new QLabel(this);
@@ -52,9 +48,6 @@ CalendarCell::CalendarCell(int year, int month, int day, bool isCurrentMonthDay,
 )");
 
     hintLabel->setVisible(false);
-
-
-
 
     layout = new QVBoxLayout(this);
     //layout = new QGridLayout(this);
@@ -96,8 +89,6 @@ CalendarCell::CalendarCell(int year, int month, int day, bool isCurrentMonthDay,
     topLayout->addWidget(dayLabel, 0, Qt::AlignLeft | Qt::AlignTop);
     topLayout->addStretch(); // Растягивающийся элемент между датой и кнопкой
     topLayout->addWidget(cornerButton, 0, Qt::AlignRight | Qt::AlignTop);
-
-
 
 
     addEventButton = new QPushButton("Добавить событие?", this);
@@ -190,13 +181,6 @@ border: 1px solid #8ecae6;
     layout->addWidget(eventEditor);
     layout->addWidget(hintLabel);
 
-
-    //layout->addWidget(dayLabel, 0, 0, 1, 2, Qt::AlignLeft | Qt::AlignTop);
-    //layout->addWidget(eventDisplayButton, 1, 0, 1, 2);
-    //layout->addWidget(addEventButton, 1, 0, 1, 2);
-    //layout->addWidget(eventEditor, 2, 0, 1, 2);
-
-
     QDate today = QDate::currentDate();
     QDate cellDate(year, month, day);
 
@@ -215,10 +199,6 @@ border: 1px solid #8ecae6;
     }
 
     hoverBackground = "#2f3136";
-
-
-
-
 
 
     if (isCurrentMonthDay) {

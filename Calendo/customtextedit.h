@@ -1,4 +1,3 @@
-// customtextedit.h
 #ifndef CUSTOMTEXTEDIT_H
 #define CUSTOMTEXTEDIT_H
 
@@ -16,28 +15,20 @@ public:
     void loadEventsFromJson(const QString &filePath);
     void setDate(const QDate &date);
     void showPlaceholder();
+    void setBellState(int state);
+    int getBellState() const;
 
 private:
-    QDate currentDate;  // ✅ Переместить сюда
-private:
+    QDate currentDate;
     bool showingPlaceholder = false;
-    QString placeholderText = "введите событие...";
+    int bellState = -1;
+    void setCursorToEnd();
 
 signals:
     void enterPressed();
 
-private:
-    int bellState = -1;
-
-public:
-    void setBellState(int state);
-    int getBellState() const;
-
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-
-private:
-    void setCursorToEnd();
 };
 
 #endif // CUSTOMTEXTEDIT_H

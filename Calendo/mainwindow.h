@@ -7,7 +7,6 @@
 #include <QMenu>
 #include <QDate>
 #include <QStackedWidget>
-#include <QGestureEvent>
 #include <QSystemTrayIcon>
 #include <QTimer>
 #include <QTime>
@@ -26,16 +25,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
-    CalendarCell* currentEditingCell = nullptr;
 
 public slots:
     void closeAllEventEditors();
 
 private:
-    CalendarCell* lastOpenedCell = nullptr;
-private:
     Ui::MainWindow *ui;
+
+    CalendarCell* currentEditingCell = nullptr;
+    CalendarCell* lastOpenedCell = nullptr;
 
     int selectedMonth = QDate::currentDate().month();
     int selectedYear = QDate::currentDate().year();
@@ -48,15 +46,13 @@ private:
     void fillCalendar(int year, int month);
     void updateCalendar();
 
-private:
     qreal accumulatedDelta = 0;
     const qreal swipeThreshold = 30.0;
 
-private:
+
     QStackedWidget *monthStack;
     int currentMonthIndex;
 
-private:
     QSystemTrayIcon *trayIcon;
     QTimer *notificationTimer;
     QDate lastNotificationDate;

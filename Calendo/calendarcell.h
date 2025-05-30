@@ -37,52 +37,25 @@ public:
     QLabel *hintLabel;
     QPushButton *cornerButton;
     QString currentIconPath;
-
+    int getYear() const { return year; }
+    int getMonth() const { return month; }
+    int getDay() const { return day; }
+    int getBellState() const { return bellState; }
+    QStringList getEventList() const { return eventEditor->getEventList(); }
 
 
 protected:
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
 
-
 private slots:
     void toggleBellIcon();
-
-private:
-    int bellState; // 0 - bell_0, 2 - bell_2
-signals:
-    void addEventClicked(int year, int month, int day);
-
-private:
-    CustomTextEdit *eventEdit;
-    QPropertyAnimation *expandAnimation;
-    QGraphicsBlurEffect *blurEffect;
-    QWidget *blurOverlay;
-    bool isExpanded = false;
-    static bool isAnyCellEditing;
-    CustomTextEdit *eventEditor;
-
-private:
-    QVBoxLayout *layout;
-    //QGridLayout *layout;
-    QLabel *dayLabel;
-    QPushButton *addEventButton;
-    QString normalBackground;
-    QPushButton* eventDisplayButton;
-private slots:
     void showEventEditor();
 
 signals:
+    void addEventClicked(int year, int month, int day);
     void closeEventEditor();
 
-
-
-public:
-    int getYear() const { return year; }
-    int getMonth() const { return month; }
-    int getDay() const { return day; }
-    int getBellState() const { return bellState; }
-    QStringList getEventList() const { return eventEditor->getEventList(); }
 private:
     Ui::CalendarCell *ui;
     QString hoverBackground;
@@ -92,11 +65,23 @@ private:
     int month;
     int day;
     void updateBackground(bool hovered = false);
-
     QTextEdit *eventTextEdit = nullptr;
     bool eventInProgress = false;
     void onAddEventLabelClicked();
-
+    int bellState; // 0 - bell_0, 2 - bell_2
+    QVBoxLayout *layout;
+    //QGridLayout *layout;
+    QLabel *dayLabel;
+    QPushButton *addEventButton;
+    QString normalBackground;
+    QPushButton* eventDisplayButton;
+    CustomTextEdit *eventEdit;
+    QPropertyAnimation *expandAnimation;
+    QGraphicsBlurEffect *blurEffect;
+    QWidget *blurOverlay;
+    bool isExpanded = false;
+    static bool isAnyCellEditing;
+    CustomTextEdit *eventEditor;
 };
 
 #endif // CALENDARCELL_H
